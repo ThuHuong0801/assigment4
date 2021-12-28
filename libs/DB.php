@@ -8,7 +8,6 @@ use app\config\DBConfig;
 class DB
 {
     private $db;
-    const SLOW_TIME = 50;
     public $table;
 
     // Connect DB
@@ -17,34 +16,39 @@ class DB
     {
         $configDB = new DBConfig;
         if($this->db === null){
-            if($type == 'read'){
+            if($type == 'read')
+            {
                 $config = $configDB->read();
-            }else{
+            }else
+            {
                 $config = $configDB->write();
             }
             $host = $config['host'];
             $dbname = $config['dbname'];
             $username = $config['username'];
             $password = $config['password'];
-            try {
+            try 
+            {
                 $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8";
                 $this->db = new PDO($dsn, $username, $password);
-            } catch (PDOException $e) {
+            } catch (PDOException $e) 
+            {
                 echo $e->getMessage();
             }
         }
     }
+    
+    public function table($table) 
+    {
+        $this->tableName = $table;
+    }
+
     /**
      * Get all records in table
      * @param array $where 
      * @param int $offset
      * @param int $limit
      */
-
-    public function fetchAll($select = ['*'],$where = [], $order = ['id', 'desc'], $limit = [0,10])
-    {
-        return $this->select($select)->where($where, $order, $limit)->get();
-    }
 
     /**
      * Get record by id
@@ -66,12 +70,14 @@ class DB
 
     public function insert($data = [])
     {
-        if($data == null){
+        if($data == null)
+        {
             return false;
         }
         $into = "INSERT INTO $this->table(";
         $values = "VALUES (";
-        foreach($data as $field => $value){
+        foreach($data as $field => $value)
+        {
             $into .= "`$field`, ";
             $values .= "'$value', ";
         }
@@ -89,11 +95,13 @@ class DB
 
     public function update($id, $data = [])
     {
-        if(!$id){
+        if(!$id)
+        {
             return false;
         }
         $sql = "UPDATE $this->table SET ";
-        foreach($data as $field => $value){
+        foreach($data as $field => $value)
+        {
             $sql .= "`$field` = '$value', ";
         }
         $sql = trim($sql, ', ');
@@ -113,7 +121,8 @@ class DB
 
     public function select($select = ['*'])
     {
-        if(is_array($select)){
+        if(is_array($select))
+        {
             $sql = "SELECT ";
             foreach($select as $field){
                 $sql .= "$field, ";
@@ -126,10 +135,12 @@ class DB
 
     public function where($where = [], $order = ['id','desc'], $limit = [0,10])
     {
-        if(!isset($this->sql)){
+        if(!isset($this->sql))
+        {
             $this->sql = "SELECT * FROM $this->table ";
         }
-        if(is_array($where) && !empty($where)){
+        if(is_array($where) && !empty($where))
+        {
             $result = 'WHERE ';
             if(is_string($where[0])){
                 $result .= $this->parseWhere($where);
@@ -143,10 +154,12 @@ class DB
             $where = rtrim($result, ' AND ');
             $this->sql .= $where;
         }
-        if($order){
-           $this->sql .= " ORDER BY ". implode(' ', $order);
+        if($order)
+        {
+            $this->sql .= " ORDER BY ". implode(' ', $order);
         }
-        if($limit){
+        if($limit)
+        {
             $limit = implode(', ', $limit);
             $this->sql .= " LIMIT $limit";
         }
@@ -155,9 +168,11 @@ class DB
 
     public function parseWhere($where)
     {
-        if(count($where) == 3){
+        if(count($where) == 3)
+        {
             $operator = $where[1];
-        }else if(count($where) == 2){
+        }else if(count($where) == 2)
+        {
             $operator = ' = ';
         }
         $first = array_shift($where);
